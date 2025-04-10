@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masters Leaderboard</title>
+  <style>
+    body {
+      background: url('https://www.masters.com/en_US/images/leaderboard/scoreboard_bg.jpg') center center no-repeat;
+      background-size: cover;
+      margin: 0;
+      font-family: 'Arial Black', Arial, sans-serif;
+      color: black;
+    }
+
+    .leaderboard {
+      max-width: 1350px;
+      margin: 60px auto;
+      background-color: #ffffffee;
+      border: 10px solid #003300;
+      border-radius: 20px 20px 10px 10px;
+      padding: 20px;
+      box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
+      overflow-x: auto;
+    }
+
+    .leaderboard h1 {
+      background: #003300;
+      color: #fff;
+      border-radius: 20px 20px 0 0;
+      text-align: center;
+      font-size: 48px;
+      letter-spacing: 4px;
+      margin: 0;
+      padding: 20px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 180px repeat(18, 30px) 60px 60px;
+      background: #fff;
+      border-top: 4px solid #000;
+      border-bottom: 4px solid #000;
+    }
+
+    .grid div {
+      text-align: center;
+      padding: 6px 2px;
+      border-left: 1px solid #ccc;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .grid div:first-child {
+      border-left: none;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 180px repeat(18, 30px) 60px 60px;
+      background: #fff;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .row:nth-child(even) {
+      background-color: #f4f4f4;
+    }
+
+    .row div {
+      text-align: center;
+      padding: 4px 0;
+      font-size: 14px;
+    }
+
+    .birdie { color: green; font-weight: bold; }
+    .bogey { color: red; font-weight: bold; }
+    .par { color: black; }
+  </style>
+</head>
+<body>
+  <div class="leaderboard">
+    <h1>LEADERS</h1>
+    <div class="grid">
+      <div>PLAYER</div>
+      <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div>
+      <div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div>
+      <div>TOT</div><div>+/-</div>
+    </div>
+    <div id="score-rows"></div>
+  </div>
+  <script>
+    async function fetchScores() {
+      const container = document.getElementById('score-rows');
+      try {
+        const res = await fetch('./scores.json');
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        container.innerHTML = '';
+        data.players.forEach(player => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          const nameCell = document.createElement('div');
+          nameCell.textContent = player.name;
+          row.appendChild(nameCell);
+          player.holes.forEach(score => {
+            const cell = document.createElement('div');
+            cell.textContent = score;
+            if (score < 4) cell.classList.add('birdie');
+            else if (score > 4) cell.classList.add('bogey');
+            else cell.classList.add('par');
+            row.appendChild(cell);
+          });
+          const totalCell = document.createElement('div');
+          totalCell.textContent = player.total;
+          row.appendChild(totalCell);
+          const parCell = document.createElement('div');
+          parCell.textContent = player.par;
+          row.appendChild(parCell);
+          container.appendChild(row);
+        });
+      } catch (err) {
+        console.error('Error loading scores:', err);
+        container.innerHTML = '<div class="row"><div style="grid-column: span 20; color: red;">Failed to load scores. Please ensure scores.json is accessible.</div></div>';
+      }
+    }
+    fetchScores();
+    setInterval(fetchScores, 30000);
+  </script>
+</body>
+</html>
