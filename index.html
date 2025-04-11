@@ -92,7 +92,7 @@
     async function fetchScores() {
       const container = document.getElementById('score-rows');
       try {
-        const res = await fetch('./scores.json');
+        const res = await fetch('https://script.google.com/macros/s/AKfycbyeGDhObkXUz1hYf7Wu2QXdslA3JWOTW92JGd64x1_bhhk6Cx0BYa8ox79Mwp5I81oO/exec');
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         container.innerHTML = '';
