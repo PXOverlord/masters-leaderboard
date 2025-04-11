@@ -33,6 +33,14 @@
       letter-spacing: 4px;
       margin: 0;
       padding: 20px 0;
+      position: relative;
+    }
+
+    .logo {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      height: 60px;
     }
 
     .grid {
@@ -79,7 +87,21 @@
 </head>
 <body>
   <div class="leaderboard">
-    <h1>LEADERS</h1>
+    <h1>
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e9/The_Masters_logo.svg/2560px-The_Masters_logo.svg.png" alt="Masters Logo" class="logo">
+      LEADERS
+    </h1>
+
+    <div style="text-align:center; margin: 20px 0;">
+      <label for="roundSelector"><strong>Select Round:</strong></label>
+      <select id="roundSelector" onchange="location.search = '?round=' + this.value;">
+        <option value="1">Round 1</option>
+        <option value="2">Round 2</option>
+        <option value="3">Round 3</option>
+        <option value="4">Round 4</option>
+      </select>
+    </div>
+
     <div class="grid">
       <div>PLAYER</div>
       <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div>
@@ -88,20 +110,30 @@
     </div>
     <div id="score-rows"></div>
   </div>
+
   <script>
     async function fetchScores() {
-      const container = document.getElementById('score-rows');
       try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbyeGDhObkXUz1hYf7Wu2QXdslA3JWOTW92JGd64x1_bhhk6Cx0BYa8ox79Mwp5I81oO/exec');
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const getRoundParam = () => {
+          const urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get("round") || "1";
+        };
+
+        const round = getRoundParam();
+        const res = await fetch(`https://script.google.com/macros/s/AKfycbyeGDhObkXUz1hYf7Wu2QXdslA3JWOTW92JGd64x1_bhhk6Cx0BYa8ox79Mwp5I81oO/exec?round=${round}`);
         const data = await res.json();
+
+        const container = document.getElementById('score-rows');
         container.innerHTML = '';
+
         data.players.forEach(player => {
           const row = document.createElement('div');
           row.className = 'row';
+
           const nameCell = document.createElement('div');
           nameCell.textContent = player.name;
           row.appendChild(nameCell);
+
           player.holes.forEach(score => {
             const cell = document.createElement('div');
             cell.textContent = score;
@@ -110,21 +142,27 @@
             else cell.classList.add('par');
             row.appendChild(cell);
           });
+
           const totalCell = document.createElement('div');
           totalCell.textContent = player.total;
           row.appendChild(totalCell);
+
           const parCell = document.createElement('div');
           parCell.textContent = player.par;
           row.appendChild(parCell);
+
           container.appendChild(row);
         });
       } catch (err) {
         console.error('Error loading scores:', err);
-        container.innerHTML = '<div class="row"><div style="grid-column: span 20; color: red;">Failed to load scores. Please ensure scores.json is accessible.</div></div>';
+        const container = document.getElementById('score-rows');
+        container.innerHTML = '<div class="row"><div style="grid-column: span 20; color: red;">Failed to load scores. Please ensure the data source is accessible.</div></div>';
       }
     }
+
     fetchScores();
     setInterval(fetchScores, 30000);
   </script>
 </body>
 </html>
+
